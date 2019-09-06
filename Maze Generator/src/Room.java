@@ -5,15 +5,16 @@ public class Room
 		private int xPos;
 		private int yPos;
 		private String[] doors;
-		private boolean hasBeenVisited;
+		private boolean visited;
 		private String roomType;
 
 		public Room(int xPos, int yPos)
 			{
 				this.xPos = xPos;
 				this.yPos = yPos;
-				this.doors = new String[4];
-				this.hasBeenVisited = false;
+				String[] tempDoors = {"Closed","Closed","Closed","Closed"};
+				this.doors = tempDoors;
+				this.visited = false;
 				this.roomType = "";
 
 			}
@@ -42,6 +43,10 @@ public class Room
 			{
 				return doors;
 			}
+		
+		public String getDoor(int doorIndex){
+			return doors[doorIndex];
+		}
 
 		public void setDoors(String[] doors)
 			{
@@ -53,14 +58,14 @@ public class Room
 				this.doors[index] = doorState;
 			}
 
-		public boolean isHasBeenVisited()
+		public boolean isVisited()
 			{
-				return hasBeenVisited;
+				return visited;
 			}
 
 		public void setHasBeenVisited(boolean hasBeenVisited)
 			{
-				this.hasBeenVisited = hasBeenVisited;
+				this.visited = hasBeenVisited;
 			}
 
 		public String getRoomType()

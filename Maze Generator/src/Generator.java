@@ -1,8 +1,9 @@
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 
 public class Generator
 	{
-		static int mazeSize = 5;
+		static int mazeSize = 16;
 
 		static Room[][] map = new Room[mazeSize][mazeSize];
 
@@ -14,7 +15,6 @@ public class Generator
 
 				// create walls on outer boarder
 				// createBoarderWalls();
-
 
 				traceMap(map[0][0]);
 
@@ -44,68 +44,42 @@ public class Generator
 
 				// setRoom to visited
 				room.setHasBeenVisited(true);
-
-				// create arrayList of available rooms (Exists and not visited)
-				ArrayList<Room> availableRooms = getAvailableRooms(room);
-				
-				if(availableRooms.size() !=0){
-				//if there are rooms:
-					//choose a random room + remove it from the available rooms
-					int randomIndex = (int)(Math.random()*availableRooms.size());
-						
-					Room chosenRoom = availableRooms.get(randomIndex);
-					availableRooms.remove(chosenRoom);
-					
-					System.out.println("New Room: ("+chosenRoom.getxPos()+", "+ chosenRoom.getyPos()+")");
-					
-				// set the door between them to open
-					
-					
-					
-				// move to that room
-
-				}
-				// if there is no available room, break to previous room
-
-			}
-
-		public static void createBoarderWalls()
-			{
-
-				for (Room[] collumn : map)
+				boolean branching = true;
+//this whole section needs to be run everytime the room branches
+				while (branching)
 					{
-						for (Room room : collumn)
+						// create arrayList of available rooms (Exists and not visited)
+						ArrayList<Room> availableRooms = getAvailableRooms(room);
+
+						if (availableRooms.size() != 0)
 							{
+								// while there are rooms:
+								// choose a random room + remove it from the available rooms
+								int randomIndex = (int) (Math.random() * availableRooms.size());
 
-								// west walls
-								if (room.getxPos() == 0)
-									{
-										room.setDoor(0, "Closed");
-									}
+								Room chosenRoom = availableRooms.get(randomIndex);
+								availableRooms.remove(chosenRoom);
 
-								// north walls
-								if (room.getyPos() == mazeSize - 1)
-									{
-										room.setDoor(1, "Closed");
-									}
+								testPirint(
+										"New Room: (" + chosenRoom.getxPos() + ", " + chosenRoom.getyPos() + ")");
 
-								// east walls
-								if (room.getxPos() == mazeSize - 1)
-									{
-										room.setDoor(2, "Closed");
-									}
+								// set the door between them to open
+								int[] doorIndexes = getConnectingDoors(room, chosenRoom);
+								room.setDoor(doorIndexes[0], "Open");
+								chosenRoom.setDoor(doorIndexes[1], "Open");
 
-								// south walls
-								if (room.getyPos() == 0)
-									{
-										room.setDoor(3, "Closed");
-									}
+								// move to that room
 
+								traceMap(chosenRoom);
+							} else
+							{
+								// if there is no available room, break to previous room
+								testPirint("Break (" + x + ", " + y + ")");
+								branching = false;
 							}
 					}
-
 			}
-
+			
 		public static void printMap()
 			{
 
@@ -124,8 +98,7 @@ public class Generator
 								if (map[x][y].getDoor(1) == "Closed")
 									{
 										System.out.print("--");
-									}
-								else
+									} else
 									{
 										System.out.print("  ");
 									}
@@ -142,27 +115,19 @@ public class Generator
 								if (map[x][y].getDoor(0) == "Closed")
 									{
 										System.out.print("|");
-									}
-								else
+									} else
 									{
 										System.out.print(" ");
 									}
-								
-								
-								//CENTER OF BOX
-								if(map[x][y].isVisited()){
-								System.out.print("V ");
-								}else{
-									System.out.print("NV");
-								}
-								
+
+								// CENTER OF BOX
+								System.out.print("  ");
 
 							}
 						if (map[mazeSize - 1][y].getDoor(2) == "Closed")
 							{
 								System.out.println("|");
-							}
-						else
+							} else
 							{
 								System.out.println();
 							}
@@ -176,8 +141,7 @@ public class Generator
 										if (map[x][y].getDoor(3) == "Closed")
 											{
 												System.out.print("--");
-											}
-										else
+											} else
 											{
 												System.out.print("  ");
 											}
@@ -190,71 +154,108 @@ public class Generator
 					}
 			}
 
-		public static ArrayList<Room> getAvailableRooms(Room room){
-			//set some variables
-			int x = room.getxPos();
-			int y = room.getyPos();
-			
-			
-			ArrayList<Room> unvisitedAdjacentRooms = new ArrayList<Room>();
-			// west room
-			try
-				{
-					if (map[x - 1][y].isVisited() == false)
-						{
+		public static ArrayList<Room> getAvailableRooms(Room room)
+			{
+				// set some variables
+				int x = room.getxPos();
+				int y = room.getyPos();
+
+				ArrayList<Room> unvisitedAdjacentRooms = new ArrayList<Room>();
+				// west room
+				try
+					{
+						if (map[x - 1][y].isVisited() == false)
+							{
 //							System.out.println("west room exists");
-							unvisitedAdjacentRooms.add(map[x - 1][y]);
-							
-						}
-				} catch (Exception e)
-				{
+								unvisitedAdjacentRooms.add(map[x - 1][y]);
+
+							}
+					} catch (Exception e)
+					{
 //					System.out.println("W");
-				}					
-			// north room
-			try
-				{
-					if (map[x][y + 1].isVisited() == false)
-						{
+					}
+				// north room
+				try
+					{
+						if (map[x][y + 1].isVisited() == false)
+							{
 //							System.out.println("north room exists");
-							unvisitedAdjacentRooms.add(map[x][y+1]);
-						}
-				} catch (Exception e)
-				{
+								unvisitedAdjacentRooms.add(map[x][y + 1]);
+							}
+					} catch (Exception e)
+					{
 //					System.out.println("N");
 
-				}	
-			
-			// east room
+					}
 
-			try
-				{
-					if (map[x + 1][y].isVisited() == false)
-						{
+				// east room
+
+				try
+					{
+						if (map[x + 1][y].isVisited() == false)
+							{
 //							System.out.println("east room exists");
-							unvisitedAdjacentRooms.add(map[x + 1][y]);
-						}
-				} catch (Exception e)
-				{
+								unvisitedAdjacentRooms.add(map[x + 1][y]);
+							}
+					} catch (Exception e)
+					{
 //					System.out.println("E");
 
-				}	
-			// south room
-			try
-				{
-					if (map[x][y-1].isVisited() == false)
-						{
+					}
+				// south room
+				try
+					{
+						if (map[x][y - 1].isVisited() == false)
+							{
 //							System.out.println("south room exists");
-							unvisitedAdjacentRooms.add(map[x][y-1]);
-						}
-				} catch (Exception e)
-				{
+								unvisitedAdjacentRooms.add(map[x][y - 1]);
+							}
+					} catch (Exception e)
+					{
 //					System.out.println("S");
 
-				}	
-			
-			
-			//return the filled arrayList
-			return unvisitedAdjacentRooms;
-			
+					}
+
+				// return the filled arrayList
+				return unvisitedAdjacentRooms;
+
+			}
+
+		public static int[] getConnectingDoors(Room a, Room b)
+			{
+
+				int dX = b.getxPos() - a.getxPos();
+				int dY = b.getyPos() - a.getyPos();
+
+				// west of a
+				if (dX == -1)
+					{
+						int[] doorIndexes = { 0, 2 };
+//						System.out.println("a");
+						return doorIndexes;
+					} else if (dY == 1)
+					{
+						int[] doorIndexes = { 1, 3 };
+//						System.out.println("b");
+						return doorIndexes;
+					} else if (dX == 1)
+					{
+						int[] doorIndexes = { 2, 0 };
+//						System.out.println("c");
+						return doorIndexes;
+					} else
+					{
+						int[] doorIndexes = { 3, 1 };
+//						System.out.println("d");
+						return doorIndexes;
+					}
+
+			}
+
+		public static void testPirint(String testPrint) {
+			boolean testPrinting = false;
+			if(testPrinting) {
+				System.out.println(testPrint);
+			}
 		}
 	}

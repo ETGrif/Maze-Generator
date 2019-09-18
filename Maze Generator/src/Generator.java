@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Generator
 	{
-		static int mazeSize = 16;
+		static int mazeSize = 10;
 
 		static Room[][] map = new Room[mazeSize][mazeSize];
 
